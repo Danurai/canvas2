@@ -42,16 +42,6 @@
 
   :cljsbuild {
     :builds {
-      :devcanvas {
-        :source-paths ["src"]
-        :figwheel true
-        :compiler {
-          :main canvas2.corecanvas
-          :asset-path "/js/compiled/canvasout"
-          :output-to "resources/public/js/compiled/canvasapp.js"
-          :output-dir "resources/public/js/compiled/canvasout"
-          :source-map-timestamp true
-          :preloads [devtools.preload]}}
       :dev {
         :source-paths ["src"]
         :figwheel true
@@ -62,8 +52,6 @@
           :output-dir "resources/public/js/compiled/out"
           :source-map-timestamp true
           :preloads [devtools.preload]
-          ;:foreign-libs [{:file "resources/public/js/three.module.js"
-          ;                :provides ["Scene" "PerspectiveCamera" "WebGLRenderer" "CubeGeometry" "MeshBasicMaterial" "Mesh"]}]
           }}
       :min {
         :source-paths ["src"]
