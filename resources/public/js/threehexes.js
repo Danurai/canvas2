@@ -14,9 +14,10 @@ function loadModel ( scene, height, url ) {
     loader.load( url, 
         (gltf) => {
             model = gltf.scene;
+            let scale = 0.025
+            model.scale.set( scale, scale, scale )
             model.position.set( 0, height, 0 )
-            model.rotation.y = 30 * Math.PI / 180;
-            model.traverse( function (node) { if ( node.isMesh ) { node.castShadow = true; } } );
+            //model.rotation.y = 30 * Math.PI / 180;
             scene.add(model);
         },
         ( xhr ) => {
@@ -48,12 +49,12 @@ function init() {
     renderer.setSize( canvas.clientWidth, canvas.clientHeight );
 
     camera = new THREE.PerspectiveCamera( 45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-    camera.position.set (50, 20, 0);
+    camera.position.set (-30, 20, 50);
 
     controls = new OrbitControls( camera, canvas );
     
     const dirLight1 = new THREE.DirectionalLight( 0xffffff );
-    dirLight1.position.set( 0, 20, 50 );
+    dirLight1.position.set( 30, 50, -50 );
     scene.add( dirLight1 );
     scene.add( new THREE.AmbientLight( 0x101010 ));
     
@@ -72,7 +73,7 @@ function init() {
     }
 
     let centreHex = getHexObject({q: 0, r: 0});
-    loadModel (scene, centreHex.userData.depth, '/models/stylized_tank/scene.gltf' );
+    loadModel (scene, centreHex.userData.depth, '/models/low_poly_stylized_tank/scene.gltf' );
 
 
     window.addEventListener( 'resize', onWindowResize );

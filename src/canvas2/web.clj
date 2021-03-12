@@ -34,6 +34,7 @@
           (navlink req "/webgl" "WebGL Demo")
           (navlink req "/webgl2" "WebGL Test")
           (navlink req "/three" "Three Demo")
+          (navlink req "/threehexes" "Three Hexes")
           (navlink req "/threecljs" "Three CLJS")
         ]]]])
         
@@ -87,6 +88,16 @@
     ;(h/include-js "js/GLTFLoader.js")
     [:script {:type "module" :src "js/threedemo.js"}]))
     
+(defn threehexes [ req ]
+  (h/html5
+    header
+    [:body {:style "margin: 0;"}
+      (navbar req)
+      [:canvas#chex]]
+    bootstrap
+    (h/include-css "css/threedemo.css")
+    [:script {:type "module" :src "js/threehexes.js"}]))
+    
 (defn threecljs [ req ]
   (h/html5
     header
@@ -102,11 +113,12 @@
     ))
     
 (defroutes app-routes
-  (GET "/"          [] home)
-  (GET "/webgl"     [] webgl)
-  (GET "/webgl2"    [] webgl2)
-  (GET "/three"     [] threedemo)
-  (GET "/threecljs" [] threecljs)
+  (GET "/"           [] home)
+  (GET "/webgl"      [] webgl)
+  (GET "/webgl2"     [] webgl2)
+  (GET "/three"      [] threedemo)
+  (GET "/threehexes" [] threehexes)
+  (GET "/threecljs"  [] threecljs)
   (resources "/"))
 
 (def app
