@@ -30,7 +30,9 @@
                 ; page rendering
                 [hiccup "1.0.5"]
                 [reagent "0.7.0"]
-                [cljs-http "0.1.46"]]
+                [cljs-http "0.1.46"]
+                [cljsjs/three "0.1.01-1"]
+                ]
 
   :plugins [[lein-figwheel "0.5.14"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
