@@ -2,6 +2,8 @@
   (:require cljsjs.three))
 
 (def canvas   (.querySelector js/document "#c"))
+(def navh     (.-clientHeight (.querySelector js/document "#nav")))
+
 (def renderer (js/THREE.WebGLRenderer. (clj->js { :canvas canvas :antialias true})))
 (def scene    (js/THREE.Scene.))
 (def camera   (let [fov 60 aspectratio (/ 16 9) near 1 far 1000]
@@ -11,7 +13,7 @@
 
 
 (defn on-window-resize [ evt ]
-  (let [ width (.-innerWidth js/window) height (.-innerHeight js/window) ]
+  (let [ width (.-innerWidth js/window) height (- (.-innerHeight js/window) navh) ]
     (set! (.-aspect camera) (/ width height))
     (.updateProjectionMatrix camera)
     (.setSize renderer width height )
@@ -25,7 +27,7 @@
 
 (defn main [& args]
   (let [width    (.-innerWidth js/window)
-        height   (.-innerHeight js/window) 
+        height   (- (.-innerHeight js/window) navh)
         geometry (js/THREE.BoxGeometry.)
         material (js/THREE.MeshPhongMaterial. (clj->js {:color 0x55ddee}))
         cube     (js/THREE.Mesh. geometry material)

@@ -2,6 +2,9 @@ import * as THREE from "https://threejsfundamentals.org/threejs/resources/threej
 import {GLTFLoader} from "https://threejsfundamentals.org/threejs/resources/threejs/r125/examples/jsm/loaders/GLTFLoader.js";
 import {OrbitControls} from "https://threejsfundamentals.org/threejs/resources/threejs/r125/examples/jsm/controls/OrbitControls.js";
 
+// Hex calculations from https://www.redblobgames.com/grids/hexagons/
+// Tank Model by MrEliptik https://sketchfab.com/3d-models/low-poly-stylized-tank-230812ff2fa74aecbd4eb6e312302b52
+
 let canvas, scene, camera, controls, renderer, raycaster;
 let model, mouse, INTERSECTED;
 
