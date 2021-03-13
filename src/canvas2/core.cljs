@@ -1,4 +1,4 @@
-(ns rathree.core
+(ns canvas2.core
   (:require cljsjs.three))
 
 (def canvas   (.querySelector js/document "#c"))
