@@ -35,6 +35,7 @@
           (navlink req "/three" "Three Demo")
           (navlink req "/threehexes" "Three Hexes")
           (navlink req "/threevox" "Three Vox")
+          (navlink req "/threetests" "Three Tests")
           (navlink req "/threecljs" "Three CLJS")
         ]]]])
         
@@ -90,10 +91,20 @@
     [:body {:style "margin: 0;"}
       (navbar req)
       [:canvas#chex]
-      [:div "Models by maxparata" [:a {:href "https://maxparata.itch.io/tank-tactic"} "https://maxparata.itch.io/tank-tactic"]]
+      [:div "Models by maxparata" [:a {:href "https://maxparata.itch.io/tank-tactic"} "https://maxparata.itch.io/tank-tactic"]]]
     bootstrap
     (h/include-css "css/threedemo.css")
     [:script {:type "module" :src "js/threevox.js"}]))
+
+(defn threetests [ req ]
+  (h/html5
+    header
+    [:body {:style "margin: 0;"}
+      (navbar req)
+      [:canvas#c]]
+    bootstrap
+    (h/include-css "css/threedemo.css")
+    [:script {:type "module" :src "js/threetests.js"}]))
     
 (defn threecljs [ req ]
   (h/html5
@@ -114,6 +125,7 @@
   (GET "/webgl"      [] webgl)
   (GET "/three"      [] threedemo)
   (GET "/threehexes" [] threehexes)
+  (GET "/threetests" [] threetests)
   (GET "/threevox"   [] threevox)
   (GET "/threecljs"  [] threecljs)
   (resources "/"))
