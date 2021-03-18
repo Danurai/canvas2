@@ -32,9 +32,9 @@
         [:ul.navbar-nav
           (navlink req "/" "Home")
           (navlink req "/webgl" "WebGL Demo")
-          (navlink req "/webgl2" "WebGL Test")
           (navlink req "/three" "Three Demo")
           (navlink req "/threehexes" "Three Hexes")
+          (navlink req "/threevox" "Three Vox")
           (navlink req "/threecljs" "Three CLJS")
         ]]]])
         
@@ -61,20 +61,6 @@
       :crossorigin "anonymous"}]
     (h/include-js "js/webgl.js")))
     
-(defn webgl2 [ req ]
-  (h/html5
-    header
-    [:body
-      (navbar req)
-      [:div.container.my-2
-        [:canvas#glcanvas {:width "640" :height "480"}]]]
-    bootstrap
-    [:script {
-      :src "https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js" 
-      :integrity "sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ==" 
-      :crossorigin "anonymous"}]
-    (h/include-js "js/webgl2.js")))
-    
 (defn threedemo [ req ]
   (h/html5
     header
@@ -97,6 +83,17 @@
     bootstrap
     (h/include-css "css/threedemo.css")
     [:script {:type "module" :src "js/threehexes.js"}]))
+
+(defn threevox [ req ]
+  (h/html5
+    header
+    [:body {:style "margin: 0;"}
+      (navbar req)
+      [:canvas#chex]
+      [:div "Models by maxparata" [:a {:href "https://maxparata.itch.io/tank-tactic"} "https://maxparata.itch.io/tank-tactic"]]
+    bootstrap
+    (h/include-css "css/threedemo.css")
+    [:script {:type "module" :src "js/threevox.js"}]))
     
 (defn threecljs [ req ]
   (h/html5
@@ -115,9 +112,9 @@
 (defroutes app-routes
   (GET "/"           [] home)
   (GET "/webgl"      [] webgl)
-  (GET "/webgl2"     [] webgl2)
   (GET "/three"      [] threedemo)
   (GET "/threehexes" [] threehexes)
+  (GET "/threevox"   [] threevox)
   (GET "/threecljs"  [] threecljs)
   (resources "/"))
 
