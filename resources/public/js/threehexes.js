@@ -173,7 +173,7 @@ function ph_corner ( center, size, i) {
     let a_rad = a_deg * Math.PI / 180;
     let x = center.x + (size * Math.cos(a_rad));
     let y = center.y + (size * Math.sin(a_rad));
-    return { x, y } 
+    return { x, y }
 }
 function axial_to_cube ( hex ) {
     let x = hex.q;
@@ -187,6 +187,8 @@ function ph_center ( origin, size, hex ) {
     let y = size * (                                  3/2 * hex.r);
     return { x, y }
 }
+
+
 
 function newhex( origin, size, hex ) {
     let colorhexes = [ 0x1144AA, 0xDAAB54, 0x007733, 0x555555 ]
