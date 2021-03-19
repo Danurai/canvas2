@@ -25,7 +25,7 @@ function init() {
     let h = canvas.clientHeight;
 
     renderer = new THREE.WebGLRenderer( { canvas, antialias: true } );
-    renderer.shadowMapEnabled = true;
+    renderer.shadowMap.enabled = true;
     renderer.setSize( w, h );
     camera = new THREE.PerspectiveCamera( 45, w/h, 1, 1000 );
     camera.position.set( -50, 30, 300)
@@ -57,7 +57,7 @@ function init() {
             image.pixels = getImageData( image );
 
             let geometry = new THREE.PlaneGeometry( 250, 250, 256, 256 );
-            material  = new THREE.MeshStandardMaterial( { color: params.modelcolor, wireframe: params.wireframe } ); //map: texture, 
+            material  = new THREE.MeshStandardMaterial( { map: texture, color: params.modelcolor, wireframe: params.wireframe } ); //map: texture, 
             plane = new THREE.Mesh( geometry, material );
             plane.receiveShadow = true;
             plane.castShadow = true;
@@ -124,7 +124,7 @@ function modifyVerticesWithTexture() {
         let xf = ( vertices[ i ] + 125 ) / 250;
         let yf = ( vertices[ i+1 ] + 125 ) / 250;
         //console.log( bilinearSample( xf, yf ) ); 
-        //plane.geometry.attributes.position.array[ i + 2 ] = bilinearSample( xf, yf );
+        plane.geometry.attributes.position.array[ i + 2 ] = bilinearSample( xf, yf );
     }
 }
 
