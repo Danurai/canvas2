@@ -10,7 +10,7 @@ let image;
 
 let params = {
     modelcolor: 0xFFFFFF,
-    wireframe: true
+    wireframe: false
 }
 
 init();
@@ -33,7 +33,7 @@ function init() {
     let light = new THREE.DirectionalLight(0x808080, 1, 100);
     light.position.set(-100, 100, -100);
     light.target.position.set(0, 0, 0);
-    light.castShadow = false;
+    light.castShadow = true;
     scene.add(light);
 
     light = new THREE.DirectionalLight(0x404040, 1, 100);
