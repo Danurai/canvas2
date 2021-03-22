@@ -1,10 +1,13 @@
 import * as THREE from "https://threejsfundamentals.org/threejs/resources/threejs/r125/build/three.module.js";
-import { VOXLoader, VOXMesh } from 'https://threejsfundamentals.org/threejs/resources/threejs/r125/examples/jsm/loaders/VOXLoader.js';
 import { MTLLoader } from "https://threejsfundamentals.org/threejs/resources/threejs/r125/examples/jsm/loaders/MTLLoader.js";
 import { OBJLoader } from "https://threejsfundamentals.org/threejs/resources/threejs/r125/examples/jsm/loaders/OBJLoader.js";
 import { OrbitControls } from "https://threejsfundamentals.org/threejs/resources/threejs/r125/examples/jsm/controls/OrbitControls.js";
 
-let canvas, scene, camera, controls, renderer, raycaster;
+import { GUI } from "/jsm/libs/dat.gui.module.js";
+
+let canvas, scene, camera, controls, renderer, raycaster, mouse, gui;
+let params = { emissive: 0x000000 };
+let INTERSECTED;
 
 
 let levelmap = {
@@ -34,22 +37,26 @@ let tilename = [
     '11-Bridge', '12-River', '13-Road_Corner', '14-Road', '15-Grass', '16-Rocks', '17-Road_T' ];
 
 
-function addTileToScene( tileno, rotation, posx, posz, mapw, maph, materials ) {
-    new OBJLoader()   
-        .setMaterials( materials )
-        .load( '/models/Terrain/' + tilename[ tileno ] + '.obj', function ( obj ) {
-            obj.traverse( function ( child ) {
-                if ( child instanceof THREE.Mesh ) {
-                    child.geometry.center();
-                    child.geometry.translate( 0, child.geometry.boundingBox.max.y, 0 );
-                    //child.geometry.translate( -child.geometry.boundingBox.min.x, child.geometry.boundingBox.max.y, -child.geometry.boundingBox.min.z );
-                }
+function addTileToScene( tileno, rotation, posx, posz, mapw, maph ) {
+    new MTLLoader().load('/models/Textures/Terrain.mtl', function ( materials ) {
+        new OBJLoader()   
+            .setMaterials( materials )
+            .load( '/models/Terrain/' + tilename[ tileno ] + '.obj', function ( obj ) {
+                obj.traverse( function ( child ) {
+                    console.log( obj );
+                    if ( child instanceof THREE.Mesh ) {
+                        child.material.emissive = new THREE.Color( 0x000000 );
+                        child.geometry.center();
+                        child.geometry.translate( 0, child.geometry.boundingBox.max.y, 0 );
+                        //child.geometry.translate( -child.geometry.boundingBox.min.x, child.geometry.boundingBox.max.y, -child.geometry.boundingBox.min.z );
+                    }
+                });
+                obj.position.x = posx * 2 - mapw;
+                obj.position.z = posz * 2 - maph;
+                obj.rotation.y = rotation *  Math.PI / 2;
+                obj.userData = {tile: {q: posx / 2, r: posz }};
+                scene.add( obj );
             });
-            obj.position.x = posx * 2 - mapw;
-            obj.position.z = posz * 2 - maph;
-            obj.rotation.y = rotation *  Math.PI / 2;
-            obj.userData = {tile: {q: posx / 2, r: posz }};
-            scene.add( obj );
         });
 } 
 
@@ -73,17 +80,26 @@ function init() {
     scene.add( dirLight1 );
     scene.add( new THREE.AmbientLight( 0x303030 ));
     
-    new MTLLoader().load('/models/Textures/Terrain.mtl', function ( materials ) {
         for ( let q = 0; q < levelmap.width * 2; q+=2 ) {
             for ( let r = 0; r < levelmap.height; r++ ) {
-                addTileToScene( levelmap.map[ r * levelmap.width * 2 + q ],  levelmap.map[ r * levelmap.width * 2 + q + 1 ], q / 2, r, levelmap.width, levelmap.height, materials );
+                addTileToScene( levelmap.map[ r * levelmap.width * 2 + q ],  levelmap.map[ r * levelmap.width * 2 + q + 1 ], q / 2, r, levelmap.width, levelmap.height );
             }
         }
-    });
 
-   window.addEventListener( 'resize', onWindowResize );
-    //canvas.addEventListener('mousemove', e => onMouseMove(e));
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
+    mouse.x = 1; mouse.y = 1;
+
+    
+    gui = new GUI()
+    //gui.add( params, "wireframe" ).onChange( function () { material.wireframe = params.wireframe });
+    gui.addColor( params, "emissive" ).onChange( function () { scene.traverse( function ( c ) { if (c instanceof THREE.Mesh) { c.object.material.emissive = params.emissive; }}); });
+
+    window.addEventListener( 'resize', onWindowResize );
+    canvas.addEventListener('mousemove', e => onMouseMove( e ));
 }
+
+
 
 function displayPalette( palette ) {
     const canvas = document.createElement( 'canvas' );
@@ -107,6 +123,12 @@ function displayPalette( palette ) {
     }
 }
 
+function onMouseMove( evt ) {
+    let rect = canvas.getBoundingClientRect();
+    mouse.x = ( evt.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( ( evt.clientY - rect.top ) / window.innerHeight ) * 2 + 1;
+}
+
 function onWindowResize() {
     let w = window.innerWidth;
     let h = window.innerHeight;
@@ -122,6 +144,28 @@ function animate() {
 }
 
 function render() {
+    raycaster.setFromCamera( mouse, camera );
+
+    let intersects = raycaster.intersectObjects( scene.children, true );
+
+
+
+    if ( intersects.length > 0 ) {
+        if ( INTERSECTED != intersects[ 0 ]) {
+            if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( 0x000000 );
+        
+            INTERSECTED = intersects[ 0 ].object;
+            INTERSECTED.material.emissive.setHex( 0xff0000 );
+        }
+    } else {
+        if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( 0x000000 );
+        INTERSECTED = null;
+    }
+
+    //for ( let i = 0; i < intersects.length; i ++ ) {
+    //    intersects[ i ].object.material.emissive = new THREE.Color( 0x555555 );
+    //}
+
     renderer.render( scene, camera );
 }
 
