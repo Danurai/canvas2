@@ -33,13 +33,11 @@ function init() {
     let light = new THREE.DirectionalLight(0x808080, 1, 100);
     light.position.set(-100, 100, -100);
     light.target.position.set(0, 0, 0);
-    light.castShadow = true;
     scene.add(light);
 
     light = new THREE.DirectionalLight(0x404040, 1, 100);
     light.position.set(100, 100, -100);
     light.target.position.set(0, 0, 0);
-    light.castShadow = true;
     scene.add(light);
 
     controls = new OrbitControls( camera, canvas );
@@ -57,10 +55,8 @@ function init() {
             image.pixels = getImageData( image );
 
             let geometry = new THREE.PlaneGeometry( 250, 250, 256, 256 );
-            material  = new THREE.MeshStandardMaterial( { map: texture, color: params.modelcolor, wireframe: params.wireframe } ); //map: texture, 
+            material  = new THREE.MeshStandardMaterial( { color: params.modelcolor, wireframe: params.wireframe } ); //map: texture, 
             plane = new THREE.Mesh( geometry, material );
-            plane.receiveShadow = true;
-            plane.castShadow = true;
             plane.rotation.x = - Math.PI/2;
             
             modifyVerticesWithTexture();
@@ -104,7 +100,7 @@ function bilinearSample ( xf, yf ) {
     let y2 = math.clamp( y1 + 1, 0, h );
 
     let xp = xf * w - x1;
-    let yp = xp * h - y1;
+    let yp = yf * h - y1;
 
     let p11 = getPixelAsFloat( x1, y1 );
     let p12 = getPixelAsFloat( x2, y1 );
@@ -114,8 +110,7 @@ function bilinearSample ( xf, yf ) {
     let px1 = math.lerp( xp, p11, p21 );
     let px2 = math.lerp( xp, p12, p22 );
 
-    return p11 * 20;
-    //return math.lerp( yp, px1, px2 ) * 20;
+    return math.lerp( yp, px1, px2 ) * 20;
 }
 
 function modifyVerticesWithTexture() {
@@ -123,7 +118,6 @@ function modifyVerticesWithTexture() {
     for (let i = 0; i < vertices.length; i += 3) {
         let xf = ( vertices[ i ] + 125 ) / 250;
         let yf = ( vertices[ i+1 ] + 125 ) / 250;
-        //console.log( bilinearSample( xf, yf ) ); 
         plane.geometry.attributes.position.array[ i + 2 ] = bilinearSample( xf, yf );
     }
 }
@@ -151,9 +145,9 @@ function modifyVerticesWithBump () {
 
 function smootherstep ( edge0, edge1, x ) {
 // Scale, and clamp x to 0..1 range
-x = math.clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+    x = math.clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
 // Evaluate polynomial
-return x * x * x * (x * (x * 6 - 15) + 10);
+    return x * x * x * (x * (x * 6 - 15) + 10);
 }
 
 function onWindowResize() {
