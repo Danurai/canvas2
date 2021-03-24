@@ -23,6 +23,7 @@
 (defn- navlink [ req, uri, title ]
   [:li.nav-item [:a.nav-link {:href uri :class (if (= (:uri req) uri) "active")} title]])
     
+
 (defn navbar [ req ]
   [:nav#nav.navbar.navbar-dark.bg-dark.navbar-expand-lg
     [:div.container-fluid
@@ -32,10 +33,15 @@
         [:ul.navbar-nav
           (navlink req "/" "Home")
           (navlink req "/webgl" "WebGL Demo")
-          (navlink req "/three" "Three Demo")
+          [:li.nav-item.dropdown 
+            [:a.nav-link.dropdown-toggle {:href "#" :data-bs-toggle "dropdown" :role "button" } "Three Demos"]
+            [:ul.dropdown-menu
+              [:li [:a.dropdown-item {:href "/three/solar"} "Solar System"]]
+              [:li [:a.dropdown-item {:href "/three/scenegraph"} "Scenegraph"]]
+              [:li [:a.dropdown-item {:href "/three/planegeometry"} "Plane Geometry"] ]
+            ]]
           (navlink req "/threehexes" "Three Hexes")
           (navlink req "/threeobj" "Three Obj")
-          (navlink req "/threetests" "Three Tests")
           (navlink req "/threecljs" "Three CLJS")
         ]]]])
         
@@ -62,19 +68,16 @@
       :crossorigin "anonymous"}]
     (h/include-js "js/webgl.js")))
     
-(defn threedemo [ req ]
+(defn threedemos [ id req ]
   (h/html5
     header
     [:body {:style "margin: 0;"}
       (navbar req)
       [:canvas#c]]
     bootstrap
-    ;[:script {:type "module" :src "js/threedemo.js"}]
-    (h/include-css "css/threedemo.css")
-    ;(h/include-js "js/three.js")
-    ;(h/include-js "js/GLTFLoader.js")
-    [:script {:type "module" :src "js/threedemo.js"}]))
-    
+    (h/include-css "/css/threedemo.css")
+    [:script {:type "module" :src (str "/js/three" id ".js") }]))
+
 (defn threehexes [ req ]
   (h/html5
     header
@@ -90,21 +93,14 @@
     header
     [:body {:style "margin: 0;"}
       (navbar req)
-      [:div "Models by maxparata" [:a {:href "https://maxparata.itch.io/tank-tactic"} "https://maxparata.itch.io/tank-tactic"]]]
-      [:canvas#chex]
+      [:div.d-flex.justify-content-around
+        [:span "Original MagicVoxel Models by maxparata " [:a {:href "https://maxparata.itch.io/tank-tactic"} "https://maxparata.itch.io/tank-tactic"]]
+        [:span#info]]
+      [:canvas#chex]]
     bootstrap
     (h/include-css "css/threedemo.css")
     [:script {:type "module" :src "js/threeobj.js"}]))
 
-(defn threetests [ req ]
-  (h/html5
-    header
-    [:body {:style "margin: 0;"}
-      (navbar req)
-      [:canvas#c]]
-    bootstrap
-    (h/include-css "css/threedemo.css")
-    [:script {:type "module" :src "js/threetests.js"}]))
     
 (defn threecljs [ req ]
   (h/html5
@@ -120,12 +116,13 @@
     ;[:script {:type "module" :src "js/compiled/app.js"}]
     ))
     
+
+
 (defroutes app-routes
   (GET "/"           [] home)
   (GET "/webgl"      [] webgl)
-  (GET "/three"      [] threedemo)
+  (GET "/three/:id"  [id] #(threedemos id %))
   (GET "/threehexes" [] threehexes)
-  (GET "/threetests" [] threetests)
   (GET "/threeobj"   [] threeobj)
   (GET "/threecljs"  [] threecljs)
   (resources "/"))
