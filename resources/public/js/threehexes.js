@@ -6,11 +6,14 @@ import {OrbitControls} from "https://threejsfundamentals.org/threejs/resources/t
 // Tank Model by MrEliptik https://sketchfab.com/3d-models/low-poly-stylized-tank-230812ff2fa74aecbd4eb6e312302b52
 
 let canvas, scene, camera, controls, renderer, raycaster;
-let model, mouse, INTERSECTED;
+let model, mouse, INTERSECTED, SELECTED;
+let textCanvas = document.createElement( 'canvas' );
+let ctx = textCanvas.getContext( '2d' );
 
 init();
 //render();  // remove when using next line for animation loop (requestAnimationFrame)
 animate();
+
 
 function loadModel ( scene, height, url ) {
     let loader = new GLTFLoader();
@@ -67,7 +70,7 @@ function init() {
     // hexes
     const origin = { x: 0, y: 0 };
     const size = 5;
-    const range = 1;
+    const range = 10;
     for (let q = - range; q <= range; q++) {
         for (let r = - range; r <= range; r++) {
             //let r = 0;
@@ -76,25 +79,37 @@ function init() {
     }
 
     let centreHex = getHexObject({q: 0, r: 0});
-    loadModel (scene, centreHex.userData.depth, '/models/low_poly_stylized_tank/scene.gltf' );
 
 
     window.addEventListener( 'resize', onWindowResize );
-    canvas.addEventListener('mousemove', e => onMouseMove(e));
+    canvas.addEventListener( 'dblclick', e => onMouseDblClick( e ) );
+    canvas.addEventListener( 'mousemove', e => onMouseMove( e ));
 }
 
 function onWindowResize() {
-    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.aspect = window.innerWidth / window.innerHeight ;
     camera.updateProjectionMatrix();
     
-    renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+    renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
 function onMouseMove( event ) {
     let rect = event.target.getBoundingClientRect();
     mouse.x = ( ( event.clientX - rect.left ) / window.innerWidth ) * 2 - 1;
     mouse.y = - ( (event.clientY - rect.top ) / window.innerHeight ) * 2 + 1;
-    //console.log(mouse);
+}
+
+function onMouseDblClick( evt ) {
+    if (INTERSECTED) {
+        if ( SELECTED == INTERSECTED ) {
+            SELECTED.material.emissive.setHex( 0x000000 );
+            SELECTED = null;
+        } else {
+            if ( SELECTED ) SELECTED.material.emissive.setHex( 0x000000 );
+            SELECTED = INTERSECTED;
+            SELECTED.material.emissive.setHex( 0x555555 );
+        }
+    }
 }
 
 function animate() {
@@ -136,14 +151,6 @@ function main() {
     let INTERSECTED;
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2( 200, 200 );
-
-    // Hexes
-    const size = 10;
-    const range = 3;
-
-    // Rotation
-    let theta = 0;
-    const radius = 100;
 
     const canvas = document.querySelector("#chex");
     const w = canvas.clientWidth;
@@ -188,26 +195,27 @@ function ph_center ( origin, size, hex ) {
     return { x, y }
 }
 
-
+document.body.append( textCanvas );
 
 function newhex( origin, size, hex ) {
-    let colorhexes = [ 0x1144AA, 0xDAAB54, 0x007733, 0x555555 ]
+    let colorHexes = [  0x1144AA, 0xDAAB54, 0x007733, 0x555555 ]
     
     let center = ph_center( origin, size, hex );
-    let corners = Array.apply(null, Array(6)).map((_,i)=>ph_corner({x: 0, y: 0},size - 1,i));
+    let corners = Array.apply(null, Array(6)).map((_,i)=>ph_corner({x: 0, y: 0},size ,i));
     let hexShape = new THREE.Shape( corners );
     let depth = Math.floor(4 * Math.random())
     
-    let extrudesettings = {
-        steps: 5,
-        depth: depth,
-        bevelEnabled: true,
-        bevelThickness: 1,
-        bevelSize: 1,
-        bevelSegments: 3
-    }
-    let geometry = new THREE.ExtrudeGeometry( hexShape, extrudesettings );
-    let material = new THREE.MeshPhongMaterial( {color: colorhexes[depth] } )
+    //let extrudesettings = {
+    //    steps: 5,
+    //    depth: depth,
+    //    bevelEnabled: true,
+    //    bevelThickness: 1,
+    //    bevelSize: 1,
+    //    bevelSegments: 3
+    //}
+    //let geometry = new THREE.ExtrudeGeometry( hexShape, extrudesettings );
+    let geometry = new THREE.ShapeGeometry( hexShape );
+    let material = new THREE.MeshPhongMaterial( {color: colorHexes[depth] } )
     let hexmesh =  new THREE.Mesh(geometry, material)
     
     hexmesh.position.set(center.x, 0, center.y);
