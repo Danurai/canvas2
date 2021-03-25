@@ -73,7 +73,8 @@
     header
     [:body {:style "margin: 0;"}
       (navbar req)
-      [:canvas#c]]
+      [:div#app
+        [:canvas#c]]]
     bootstrap
     (h/include-css "/css/threedemo.css")
     [:script {:type "module" :src (str "/js/three" id ".js") }]))
