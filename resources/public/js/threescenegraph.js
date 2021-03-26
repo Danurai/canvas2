@@ -7,9 +7,10 @@ let renderer, scene, controls, stats;
 
 let targetOrbit, tank, targetElevation, targetBob, targetCameraPivot, turretPivot;
 let tankCamera, targetCamera, turretCamera, camera;
+let cameras;
 let groundMesh, splineObject, bodyMesh, wheels, domeMesh, turretMesh, targetMesh; 
 
-let curve;
+let curve, targetMaterial, infoElem;
 let tankPosition = new THREE.Vector2();
 let tankTarget = new THREE.Vector2();
 let targetPosition = new THREE.Vector3();
@@ -17,13 +18,24 @@ let targetPosition = new THREE.Vector3();
 init();
 requestAnimationFrame( render );
 
+function makeCamera( fov = 40 ) {
+  let w = window.innerWidth;
+  let h = window.innerHeight - document.querySelector('#nav').clientHeight;
+  let cam = new THREE.PerspectiveCamera( fov, w / h, 0.1, 1000 );
+  return cam;
+}
+
 function init() {
   let canvas = document.querySelector('#c');
   let nav = document.querySelector('#nav');
   let w = window.innerWidth;
   let h = window.innerHeight - nav.clientHeight;
 
-  camera = new THREE.PerspectiveCamera( 45, w / h, 0.1, 1000 );
+  infoElem = document.createElement('div');
+  infoElem.id = 'info';
+  document.querySelector('#app').append( infoElem );
+
+  let camera = makeCamera();
   camera.position.set( 0, 20, 30 );
   
   scene = new THREE.Scene();
@@ -86,10 +98,16 @@ function init() {
   tank = new THREE.Object3D();
   scene.add( tank );
 
+
   bodyMesh = new THREE.Mesh( geometry, material );
   bodyMesh.position.y = 1.5;
   bodyMesh.castShadow = true;
   tank.add( bodyMesh );
+
+  tankCamera = makeCamera( 70 );
+  tankCamera.position.set( 0, 3, -6 );
+  tankCamera.rotation.y = Math.PI;
+  bodyMesh.add( tankCamera );
 
   geometry = new THREE.CylinderGeometry( 1, 1, 0.5 );
   material = new THREE.MeshStandardMaterial( { color: 0x444444 } );
@@ -116,14 +134,19 @@ function init() {
   domeMesh.castShadow = true;
   bodyMesh.add( domeMesh );
 
-  geometry = new THREE.BoxGeometry( 0.5, 0.5, 5 );
+  geometry = new THREE.BoxGeometry( 0.5, 0.5, 3 );
   turretMesh = new THREE.Mesh( geometry, material );
   turretMesh.position.set( 0, 0.5, 3 );
   turretMesh.castShadow = true;
   turretPivot.add( turretMesh );
 
-  geometry = new THREE.SphereGeometry( 0.2, 10, 10 );
-  targetMesh = new THREE.Mesh( geometry, material );
+  turretCamera = makeCamera()
+  turretCamera.position.y = 1;
+  turretMesh.add( turretCamera );
+
+  targetMaterial = new THREE.MeshPhongMaterial( { color: 0x000000 } );
+  geometry = new THREE.SphereGeometry( 0.5, 10, 10 );
+  targetMesh = new THREE.Mesh( geometry, targetMaterial );
   targetMesh.castShadow = true;
   
   targetOrbit = new THREE.Object3D();
@@ -132,12 +155,27 @@ function init() {
   targetElevation.position.z = 10;
   targetBob = new THREE.Object3D();
 
+  
+
   scene.add( targetOrbit );
   targetOrbit.add( targetElevation );
   targetElevation.add( targetBob );
   targetBob.add( targetMesh );
 
+  targetCamera = makeCamera();
+  targetCamera.position.set ( 0, 1, 2 );
+  targetCamera.rotation.y = Math.PI;
+  
+  targetCameraPivot = new THREE.Object3D();
+  targetBob.add( targetCameraPivot );
+  targetCameraPivot.add( targetCamera );
 
+  cameras = [
+    { cam: camera, desc: 'detached camera' },
+    { cam: turretCamera, desc: 'on turret looking at target' },
+    { cam: targetCamera, desc: 'near target looking at tank' },
+    { cam: tankCamera, desc: 'above back of tank' },
+  ];
   controls = new OrbitControls( camera, canvas );
   stats = new Stats()
   document.querySelector('#app').append( stats.dom );
@@ -154,6 +192,13 @@ function init() {
 function render( time ) {
   time *= 0.001;
 
+  targetOrbit.rotation.y = time * .27;
+  targetBob.position.y = Math.sin(time * 2) * 4;
+  targetMesh.rotation.x = time * 7;
+  targetMesh.rotation.y = time * 13;
+  targetMaterial.emissive.setHSL(time * 10 % 1, 1, .25);
+  targetMaterial.color.setHSL(time * 10 % 1, 1, .25);
+
   let tankTime = time * .05;
   curve.getPointAt( tankTime % 1, tankPosition );
   curve.getPointAt( (tankTime + 0.01  ) % 1, tankTarget );
@@ -161,11 +206,21 @@ function render( time ) {
   tank.lookAt( tankTarget.x, 0, tankTarget.y );
 
   wheels.forEach( ( obj ) => { obj.rotation.x = time * 3 });
-  renderer.render( scene, camera );
  
   targetMesh.getWorldPosition( targetPosition );
   turretPivot.lookAt( targetPosition );
-  
+
+  turretCamera.lookAt( targetPosition );
+
+  tank.getWorldPosition( targetPosition );
+  targetCamera.lookAt( targetPosition );
+
+
+
+  let camera = cameras[time * .25 % cameras.length | 0];
+  infoElem.textContent = camera.desc;
+
+  renderer.render( scene, camera.cam );
   controls.update();
   stats.update();
   requestAnimationFrame( render );

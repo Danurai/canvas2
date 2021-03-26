@@ -9,8 +9,8 @@ let cube, plane, material, mesh;
 let image;
 
 let params = {
-    modelcolor: 0xFFFFFF,
-    wireframe: false
+    modelcolor: 0x994545,
+    wireframe: true
 }
 
 init();
@@ -21,47 +21,64 @@ function init() {
     scene.background = new THREE.Color( 0xaaaaaa );
 
     let canvas = document.querySelector('#c');
-    let w = canvas.clientWidth;
-    let h = canvas.clientHeight;
+    let w = window.innerWidth;
+    let h = window.innerHeight - document.querySelector('#nav').clientHeight;
 
     renderer = new THREE.WebGLRenderer( { canvas, antialias: true } );
     renderer.shadowMap.enabled = true;
     renderer.setSize( w, h );
-    camera = new THREE.PerspectiveCamera( 45, w/h, 1, 1000 );
-    camera.position.set( -50, 30, 300)
+    camera = new THREE.PerspectiveCamera( 45, w / h, 1, 1000 );
+    camera.position.set( 0, 100, -300)
 
-    let light = new THREE.DirectionalLight(0x808080, 1, 100);
-    light.position.set(-100, 100, -100);
+    let light = new THREE.DirectionalLight( 0x808080, 2 );
+    light.position.set( 100, 100, 250 );
     light.target.position.set(0, 0, 0);
+    light.castShadow = true
     scene.add(light);
 
-    light = new THREE.DirectionalLight(0x404040, 1, 100);
-    light.position.set(100, 100, -100);
-    light.target.position.set(0, 0, 0);
-    scene.add(light);
+    //light = new THREE.DirectionalLight(0x404040, 1, 100);
+    //light.position.set(100, 100, -100);
+    //light.target.position.set(0, 0, 0);
+    //scene.add(light);
 
     controls = new OrbitControls( camera, canvas );
 
 
     let texture = new THREE.TextureLoader().load('/img/textures/hex.png');
 
-    //modifyVertices();
-    //modifyVerticesWithBump();
     
-    let imgLoader = new THREE.TextureLoader();
-    imgLoader.load('/img/textures/danmap.png', 
-        function ( res ) {
-            image = res.image;
-            image.pixels = getImageData( image );
+    let geometry = new THREE.PlaneGeometry( 250, 250, 256, 256 );
+    material  = new THREE.MeshPhongMaterial( { color: params.modelcolor, wireframe: params.wireframe, side: THREE.DoubleSide } ); //map: texture, 
+    plane = new THREE.Mesh( geometry, material );
+    plane.rotation.x = - Math.PI / 2;
+    plane.receiveShadow = true;
+    plane.castShadow = true;
+    scene.add( plane );
+    //modifyVertices();
+    modifyVerticesWithBump();
+    
+    //let imgLoader = new THREE.TextureLoader();
+    //imgLoader.load('/img/textures/danmap.png', 
+    //    function ( res ) {
+    //        image = res.image;
+    //        image.pixels = getImageData( image );
+    //        let geometry = new THREE.PlaneGeometry( 250, 250, 256, 256 );
+    //        material  = new THREE.MeshPhongMaterial( { color: params.modelcolor, wireframe: params.wireframe } ); //map: texture, 
+    //        plane = new THREE.Mesh( geometry, material );
+    //        plane.receiveShadow = true;
+    //        plane.castShadow = true;
+    //        plane.rotation.x = - Math.PI/2;
+    //        
+    //        modifyVerticesWithTexture();
+    //        scene.add( plane );
+    //    });
 
-            let geometry = new THREE.PlaneGeometry( 250, 250, 256, 256 );
-            material  = new THREE.MeshStandardMaterial( { color: params.modelcolor, wireframe: params.wireframe } ); //map: texture, 
-            plane = new THREE.Mesh( geometry, material );
-            plane.rotation.x = - Math.PI/2;
-            
-            modifyVerticesWithTexture();
-            scene.add( plane );
-        });
+    let boxGeo = new THREE.BoxGeometry( 10, 10, 10 );
+    let boxMat = new THREE.MeshPhongMaterial( { color: 0x1111aa });
+    let boxMesh = new THREE.Mesh( boxGeo, boxMat );
+    boxMesh.position.set( 0, 10, 0 );
+    boxMesh.castShadow = true;
+    //scene.add( boxMesh );
 
 
     window.addEventListener( 'resize', onWindowResize );
@@ -151,9 +168,11 @@ function smootherstep ( edge0, edge1, x ) {
 }
 
 function onWindowResize() {
-    let canvas = renderer.domElement;
-    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    let w = window.innerWidth;
+    let h = window.innerHeight - document.querySelector('#nav').clientHeight;
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    renderer.setSize( w, h );
 }
 
 function animate () {
