@@ -12,3 +12,12 @@ canvas {
 #app {
     position: relative;
 }
+
+#info {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: lightgrey;
+    background-color: black;
+    padding: 0.5rem;
+}
