@@ -43,6 +43,7 @@
           (navlink req "/threehexes" "Three Hexes")
           (navlink req "/threeobj" "Three Obj")
           (navlink req "/threecljs" "Three CLJS")
+          (navlink req "/maptests" "Map Tests")
         ]]]])
         
 (defn home [ req ]
@@ -117,7 +118,17 @@
     ;[:script {:type "module" :src "js/compiled/app.js"}]
     ))
     
-
+  (defn maptests [ req ]
+    (h/html5
+      header
+      [:body {:style "margin: 0;"}
+        (navbar req)
+        [:div#app
+          [:canvas#chex {:width "500px" :height "400px" :style "margin: 1rem;"}]
+          [:canvas#cgrd {:width "500px" :height "400px" :style "margin: 1rem;"}]]]
+      bootstrap
+      ;(h/include-css "/css/threedemo.css")
+      [:script {:type "module" :src (str "/js/gridview.js") }]))
 
 (defroutes app-routes
   (GET "/"           [] home)
@@ -126,6 +137,7 @@
   (GET "/threehexes" [] threehexes)
   (GET "/threeobj"   [] threeobj)
   (GET "/threecljs"  [] threecljs)
+  (GET "/maptests"   [] maptests)
   (resources "/"))
 
 (def app
